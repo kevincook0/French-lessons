@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Français daily</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #ffffff; --bg2: #f5f4f1; --text: #1a1a18; --text2: #6b6b67; --text3: #a0a09c;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --blue: #185FA5; --blue-bg: #E6F1FB; --blue-text: #185FA5;
+    --green-bg: #EAF3DE; --green-text: #27500A; --green-border: #97C459;
+    --red-bg: #FAECE7; --red-text: #4A1B0C; --red-border: #F0997B;
+    --radius: 8px; --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --bg2: #252523; --text: #f0efe8; --text2: #a0a09a; --text3: #6b6b65;
+      --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
+      --blue: #85B7EB; --blue-bg: #0c1f33; --blue-text: #85B7EB;
+      --green-bg: #172804; --green-text: #C0DD97; --green-border: #3B6D11;
+      --red-bg: #2a0e06; --red-text: #F0997B; --red-border: #993C1D;
+    }
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  #app { max-width: 520px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* HOME */
+  .home-top { margin-bottom: 2.5rem; }
+  .home-top h1 { font-size: 22px; font-weight: 500; }
+  .home-top p { font-size: 14px; color: var(--text2); margin-top: 4px; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 2.5rem; }
+  .stat-card { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; }
+  .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 500; }
+  .start-area { text-align: center; }
+  .start-btn { display: inline-block; padding: 14px 40px; border-radius: var(--radius-lg); border: 0.5px solid var(--border2); background: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text); font-family: inherit; transition: background 0.12s; }
+  .start-btn:hover { background: var(--bg2); }
+  .start-sub { margin-top: 10px; font-size: 13px; color: var(--text3); min-height: 20px; }
+
+  /* QUIZ */
+  .quiz-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
+  .back-btn { font-size: 14px; background: none; border: none; cursor: pointer; color: var(--text2); padding: 0; font-family: inherit; }
+  .quiz-count { font-size: 13px; color: var(--text2); flex: 1; text-align: right; }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
+  .question-type { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+  .mc-question { background: var(--bg2); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; min-height: 110px; display: flex; align-items: center; justify-content: center; }
+  .mc-q-text { font-size: 24px; font-weight: 500; text-align: center; line-height: 1.35; }
+  .mc-q-hint { font-size: 13px; color: var(--text2); text-align: center; margin-top: 8px; }
+  .mc-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
+  .mc-opt { padding: 14px 16px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; font-size: 14px; color: var(--text); text-align: left; line-height: 1.4; transition: all 0.12s; font-family: inherit; }
+  .mc-opt:hover:not([disabled]) { background: var(--bg2); }
+  .mc-opt.correct { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .mc-opt.wrong { background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); }
+  .mc-opt.reveal-correct { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+  .mc-feedback { font-size: 14px; text-align: center; min-height: 22px; margin-bottom: 1rem; }
+  .next-btn { width: 100%; padding: 12px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: var(--bg); cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text); transition: all 0.12s; font-family: inherit; }
+  .next-btn:hover { background: var(--bg2); }
+  .next-btn:disabled { opacity: 0.35; cursor: default; }
+
+  /* RESULTS */
+  .results-wrap { text-align: center; padding: 0.5rem 0; }
+  .results-score { font-size: 60px; font-weight: 500; line-height: 1; margin-bottom: 6px; }
+  .results-fraction { font-size: 15px; color: var(--text2); margin-bottom: 8px; }
+  .results-msg { font-size: 16px; margin-bottom: 2rem; }
+  .results-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .results-btn { padding: 10px 22px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: none; cursor: pointer; font-size: 14px; color: var(--text); font-family: inherit; transition: background 0.12s; }
+  .results-btn:hover { background: var(--bg2); }
+  .missed-list { text-align: left; margin-top: 2rem; }
+  .missed-title { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .missed-item { padding: 9px 12px; border-radius: var(--radius); background: var(--bg2); font-size: 13px; margin-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; }
+  .missed-fr { font-weight: 500; }
+  .missed-en { color: var(--text2); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <div id="screen-home" class="screen active">
+    <div class="home-top">
+      <h1>Français daily</h1>
+      <p>25 questions · mixed EN↔FR · weighted to recent words</p>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Total words</div><div class="stat-val" id="stat-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-val" id="stat-sessions">0</div></div>
+      <div class="stat-card"><div class="stat-label">Streak</div><div class="stat-val" id="stat-streak">0</div></div>
+    </div>
+    <div class="start-area">
+      <button class="start-btn" onclick="startSession()">Start today's lesson →</button>
+      <div class="start-sub" id="home-sub"></div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <button class="back-btn" onclick="goHome()">← Home</button>
+      <div class="quiz-count" id="quiz-count">1 / 25</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="quiz-bar" style="width:0%"></div></div>
+    <div class="question-type" id="q-type"></div>
+    <div class="mc-question">
+      <div style="width:100%">
+        <div class="mc-q-text" id="mc-q"></div>
+        <div class="mc-q-hint" id="mc-hint"></div>
+      </div>
+    </div>
+    <div class="mc-options" id="mc-options"></div>
+    <div class="mc-feedback" id="mc-feedback"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>Next →</button>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="results-wrap">
+      <div class="results-score" id="res-pct"></div>
+      <div class="results-fraction" id="res-fraction"></div>
+      <div class="results-msg" id="res-msg"></div>
+      <div class="results-actions">
+        <button class="results-btn" onclick="goHome()">← Home</button>
+        <button class="results-btn" id="retry-btn" onclick="retryMissed()" style="display:none">Retry missed →</button>
+      </div>
+      <div class="missed-list" id="missed-list"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+// ─────────────────────────────────────────────────────────────────
+//  VOCABULARY
+//  Add new Friday words at the BOTTOM of this array.
+//  The weighting system treats words later in the list as more
+//  recent and will surface them more often in daily sessions.
+//
+//  Format: { fr: "French", en: "English", cat: "Category", note: "optional" }
+// ─────────────────────────────────────────────────────────────────
+const VOCAB = [
+  // Basics
+  {fr:"J'ai",en:"I have",cat:"Basics",note:""},
+  {fr:"Je suis",en:"I am",cat:"Basics",note:""},
+
+  // Places
+  {fr:"aux États-Unis",en:"in the United States",cat:"Places",note:""},
+  {fr:"à Montréal",en:"in Montreal",cat:"Places",note:""},
+  {fr:"au Canada",en:"in Canada",cat:"Places",note:""},
+
+  // Work & Tech
+  {fr:"logiciel",en:"software",cat:"Work & Tech",note:""},
+  {fr:"les affaires",en:"business",cat:"Work & Tech",note:""},
+  {fr:"mon travail",en:"my work",cat:"Work & Tech",note:""},
+  {fr:"énergie propre",en:"clean energy",cat:"Work & Tech",note:""},
+  {fr:"panneau solaire sur le toit",en:"solar panel on the roof",cat:"Work & Tech",note:""},
+  {fr:"service public",en:"utility",cat:"Work & Tech",note:""},
+  {fr:"fournisseur",en:"provider",cat:"Work & Tech",note:""},
+  {fr:"tarif horaire",en:"utility rate",cat:"Work & Tech",note:""},
+  {fr:"stockage d'énergie",en:"batteries / energy storage",cat:"Work & Tech",note:""},
+  {fr:"mon patron",en:"my company's owner / boss",cat:"Work & Tech",note:""},
+  {fr:"mon chef",en:"my direct boss",cat:"Work & Tech",note:""},
+
+  // Objects
+  {fr:"vitre",en:"glass (window pane)",cat:"Objects",note:""},
+  {fr:"glace",en:"ice",cat:"Objects",note:""},
+  {fr:"robinet",en:"tap / faucet",cat:"Objects",note:""},
+  {fr:"le plancher",en:"floor (inside)",cat:"Objects",note:""},
+
+  // Nature
+  {fr:"le sol",en:"soil / ground",cat:"Nature",note:""},
+
+  // Food
+  {fr:"jaune d'œuf",en:"egg yolk",cat:"Food",note:""},
+  {fr:"blanc d'œuf",en:"egg white",cat:"Food",note:""},
+  {fr:"de l'ail",en:"garlic",cat:"Food",note:""},
+  {fr:"bouffe",en:"food (informal)",cat:"Food",note:"Québécois"},
+
+  // People
+  {fr:"ma copine",en:"my girlfriend",cat:"People",note:""},
+  {fr:"ami en commun",en:"mutual friend",cat:"People",note:""},
+
+  // School / life
+  {fr:"cours",en:"class / course",cat:"School",note:""},
+  {fr:"course",en:"race",cat:"Sports & Life",note:""},
+  {fr:"courses",en:"errands",cat:"Daily Life",note:""},
+  {fr:"terrain de tennis",en:"tennis court",cat:"Sports & Life",note:""},
+  {fr:"casque",en:"helmet",cat:"Sports & Life",note:""},
+  {fr:"des tâches",en:"tasks",cat:"Daily Life",note:""},
+
+  // Health
+  {fr:"je me suis blessé au genou",en:"I hurt my knee",cat:"Health",note:""},
+
+  // Words
+  {fr:"le début",en:"the beginning",cat:"Words",note:""},
+  {fr:"argent",en:"money",cat:"Words",note:""},
+  {fr:"abonnement",en:"subscription",cat:"Words",note:""},
+  {fr:"le marché",en:"the market",cat:"Words",note:""},
+  {fr:"propriétaires de maisons",en:"homeowners",cat:"Words",note:""},
+  {fr:"jaser",en:"to chat / talk",cat:"Words",note:"Québécois"},
+
+  // Phrases
+  {fr:"en cas d'urgence",en:"for backup / in an emergency",cat:"Phrases",note:""},
+  {fr:"il y a 5 ans",en:"5 years ago",cat:"Phrases",note:""},
+  {fr:"faire du profit",en:"to make profit",cat:"Phrases",note:""},
+  {fr:"profiter",en:"to enjoy / take advantage of",cat:"Phrases",note:""},
+  {fr:"ça vaut pas la peine",en:"it's not worth it",cat:"Phrases",note:""},
+  {fr:"la plupart du temps",en:"most of the time",cat:"Phrases",note:""},
+  {fr:"je suis abonnée à cette chaîne",en:"I'm subscribed to this channel",cat:"Phrases",note:""},
+
+  // Imparfait
+  {fr:"j'avais",en:"I had (imperfect)",cat:"Imparfait",note:"avoir"},
+  {fr:"j'étais",en:"I was (imperfect)",cat:"Imparfait",note:"être"},
+  {fr:"j'allais",en:"I was going (imperfect)",cat:"Imparfait",note:"aller"},
+  {fr:"je voulais",en:"I wanted (imperfect)",cat:"Imparfait",note:"vouloir"},
+  {fr:"je disais",en:"I was saying (imperfect)",cat:"Imparfait",note:"dire"},
+  {fr:"je partais",en:"I was leaving (imperfect)",cat:"Imparfait",note:"partir"},
+  {fr:"je faisais",en:"I was doing (imperfect)",cat:"Imparfait",note:"faire"},
+  {fr:"je venais",en:"I was coming (imperfect)",cat:"Imparfait",note:"venir"},
+  {fr:"je prenais",en:"I was taking (imperfect)",cat:"Imparfait",note:"prendre"},
+  {fr:"je voyais",en:"I was seeing (imperfect)",cat:"Imparfait",note:"voir"},
+  {fr:"je pouvais",en:"I was able to (imperfect)",cat:"Imparfait",note:"pouvoir"},
+  {fr:"je parlais",en:"I was speaking (imperfect)",cat:"Imparfait",note:"parler"},
+  {fr:"je choisissais",en:"I was choosing (imperfect)",cat:"Imparfait",note:"choisir"},
+  {fr:"j'attendais",en:"I was waiting (imperfect)",cat:"Imparfait",note:"attendre"},
+
+  // Passé composé
+  {fr:"elle a grandi",en:"she grew up",cat:"Passé composé",note:""},
+  {fr:"il est retourné",en:"he returned",cat:"Passé composé",note:"être verb"},
+  {fr:"il est allé",en:"he went",cat:"Passé composé",note:"être verb"},
+  {fr:"il est monté",en:"he went up",cat:"Passé composé",note:"être verb"},
+  {fr:"il est arrivé",en:"he arrived",cat:"Passé composé",note:"être verb"},
+  {fr:"il est entré",en:"he entered",cat:"Passé composé",note:"être verb"},
+  {fr:"il est venu",en:"he came",cat:"Passé composé",note:"être verb"},
+  {fr:"il est resté",en:"he stayed",cat:"Passé composé",note:"être verb"},
+  {fr:"il est parti",en:"he left",cat:"Passé composé",note:"être verb"},
+  {fr:"il est sorti",en:"he went out",cat:"Passé composé",note:"être verb"},
+  {fr:"il est descendu",en:"he went down",cat:"Passé composé",note:"être verb"},
+  {fr:"il est tombé",en:"he fell",cat:"Passé composé",note:"être verb"},
+  {fr:"j'ai vendu",en:"I sold",cat:"Passé composé",note:"avoir verb"},
+  {fr:"j'ai acheté",en:"I bought",cat:"Passé composé",note:"avoir verb"},
+  {fr:"je me suis fait $300",en:"I made $300",cat:"Passé composé",note:""},
+  {fr:"j'ai arrêté de jouer",en:"I stopped playing",cat:"Passé composé",note:""},
+  {fr:"je suis allé",en:"I went",cat:"Passé composé",note:"être verb"},
+  {fr:"je suis parti",en:"I left",cat:"Passé composé",note:"être verb"},
+  {fr:"j'ai recommencé",en:"I started again",cat:"Passé composé",note:"avoir verb"},
+
+  // Pronominaux
+  {fr:"se réveiller",en:"to wake up",cat:"Pronominaux",note:""},
+  {fr:"se lever",en:"to get up",cat:"Pronominaux",note:""},
+  {fr:"se doucher",en:"to shower",cat:"Pronominaux",note:""},
+  {fr:"se brosser les dents",en:"to brush one's teeth",cat:"Pronominaux",note:""},
+  {fr:"se raser",en:"to shave",cat:"Pronominaux",note:""},
+  {fr:"se coiffer",en:"to do one's hair",cat:"Pronominaux",note:""},
+  {fr:"s'habiller",en:"to get dressed",cat:"Pronominaux",note:""},
+  {fr:"se reposer",en:"to rest",cat:"Pronominaux",note:""},
+  {fr:"se connecter",en:"to log on / connect",cat:"Pronominaux",note:""},
+  {fr:"s'amuser",en:"to have fun",cat:"Pronominaux",note:""},
+  {fr:"s'informer",en:"to inform oneself",cat:"Pronominaux",note:""},
+  {fr:"se déshabiller",en:"to undress",cat:"Pronominaux",note:""},
+  {fr:"se coucher",en:"to go to bed",cat:"Pronominaux",note:""},
+  {fr:"s'endormir",en:"to fall asleep",cat:"Pronominaux",note:""},
+
+  // ── Cours 6 ───────────────────────────────────────────────────
+  {fr:"la dernière fois qu'on s'est rencontré",en:"the last time we met",cat:"Phrases",note:"se rencontrer"},
+  {fr:"la semaine dernière",en:"last week",cat:"Phrases",note:""},
+  {fr:"se rencontrer",en:"to meet (each other)",cat:"Verbs",note:""},
+  {fr:"pour me reposer",en:"to rest / in order to rest",cat:"Phrases",note:""},
+  {fr:"la gestion",en:"management",cat:"Work & Tech",note:""},
+  {fr:"une mise à pied",en:"a layoff",cat:"Work & Tech",note:"many people at once"},
+  {fr:"ma patronne",en:"my boss (female)",cat:"Work & Tech",note:""},
+  {fr:"restreint",en:"constricted / limited",cat:"Words",note:""},
+  {fr:"on est allé",en:"we went",cat:"Passé composé",note:""},
+  {fr:"on y va",en:"let's go / we're going",cat:"Phrases",note:""},
+  {fr:"les trippeux de randonnée",en:"hiking enthusiasts",cat:"Sports & Life",note:"Québécois"},
+  {fr:"ski rando",en:"backcountry skiing",cat:"Sports & Life",note:"randonnée"},
+  {fr:"dans l'Ouest",en:"in the West",cat:"Places",note:""},
+  {fr:"régions plus éloignées",en:"more remote regions",cat:"Places",note:""},
+  {fr:"difficiles d'accès",en:"hard to access / remote",cat:"Phrases",note:""},
+  {fr:"le réchauffement climatique",en:"global warming",cat:"Nature",note:""},
+  {fr:"une façon d'assurer",en:"a way to ensure",cat:"Phrases",note:"assurer = to ensure"},
+  {fr:"le talon",en:"heel",cat:"Body",note:""},
+  {fr:"l'orteil",en:"toe",cat:"Body",note:""},
+  {fr:"quand j'avais 2 ans",en:"when I was 2 years old",cat:"Phrases",note:"âge uses avoir in French"},
+  {fr:"garder",en:"to keep / to retain",cat:"Verbs",note:""},
+  {fr:"serré",en:"tight / constricted (financially)",cat:"Words",note:""},
+  {fr:"ça appartient à",en:"it belongs to",cat:"Phrases",note:""},
+  {fr:"détenu par",en:"owned by",cat:"Phrases",note:""},
+
+  // ── Cours 7 ───────────────────────────────────────────────────
+  {fr:"elle vient juste de se marier",en:"she just got married",cat:"Phrases",note:"venir de + infinitif"},
+  {fr:"mes condoléances",en:"my condolences",cat:"Phrases",note:""},
+  {fr:"une pelle",en:"a shovel",cat:"Objects",note:""},
+  {fr:"tu t'es couché tard ?",en:"did you go to bed late?",cat:"Phrases",note:""},
+  {fr:"un balai à neige",en:"a snow brush",cat:"Objects",note:""},
+  {fr:"déneiger",en:"to clear snow (from a car or stairs)",cat:"Verbs",note:""},
+  {fr:"le cancer du sein",en:"breast cancer",cat:"Health",note:""},
+  {fr:"le cancer des poumons",en:"lung cancer",cat:"Health",note:""},
+  {fr:"les funérailles",en:"the funeral",cat:"Words",note:"always plural"},
+  {fr:"j'étais l'animateur",en:"I was the host",cat:"Phrases",note:"animateur = host/MC"},
+  {fr:"un webinaire",en:"a webinar",cat:"Work & Tech",note:""},
+  {fr:"un sommet",en:"a summit",cat:"Words",note:""},
+  {fr:"un congrès",en:"a conference / congress",cat:"Words",note:""},
+  {fr:"un discours",en:"a speech",cat:"Words",note:""},
+  {fr:"une présentation",en:"a presentation",cat:"Words",note:""},
+  {fr:"je ne connaissais pas sa mère",en:"I didn't know his/her mother",cat:"Phrases",note:"connaître + noun"},
+  {fr:"ont assisté",en:"attended",cat:"Verbs",note:"assister à ≠ attendre"},
+  {fr:"des tendances",en:"trends",cat:"Words",note:""},
+  {fr:"des nouvelles",en:"news",cat:"Words",note:""},
+  {fr:"un suivi",en:"a follow-up",cat:"Work & Tech",note:""},
+  {fr:"une date de lancement",en:"a release date",cat:"Work & Tech",note:""},
+  {fr:"la présentation la plus impressionnante que j'ai faite",en:"the most impressive presentation I gave",cat:"Phrases",note:"superlative"},
+  {fr:"des employeurs potentiels",en:"potential employers",cat:"Work & Tech",note:""},
+  {fr:"dans mon réseau",en:"in my network",cat:"Work & Tech",note:""},
+  {fr:"dans mon domaine",en:"in my field",cat:"Work & Tech",note:""},
+  {fr:"je me souviens",en:"I remember",cat:"Verbs",note:"se souvenir"},
+  {fr:"il s'était disputé",en:"he had argued / had a fight",cat:"Phrases",note:"plus-que-parfait"},
+  {fr:"des sièges au parlement",en:"seats in parliament",cat:"Words",note:""},
+
+  // ── Cours 8 ───────────────────────────────────────────────────
+  {fr:"le jour de l'an",en:"New Year's Day",cat:"Words",note:""},
+  {fr:"je me suis beaucoup amélioré",en:"I improved a lot",cat:"Phrases",note:"s'améliorer"},
+  {fr:"axé sur",en:"focused on",cat:"Phrases",note:""},
+  {fr:"le contenu dépérit",en:"the content deteriorates",cat:"Phrases",note:"dépérir = to wither/decay"},
+  {fr:"diminuer",en:"to decrease / to diminish",cat:"Verbs",note:""},
+  {fr:"se détériorer",en:"to deteriorate",cat:"Verbs",note:""},
+  {fr:"distraits",en:"distracted",cat:"Words",note:""},
+  {fr:"ça ne te demande pas de penser",en:"it doesn't require you to think",cat:"Phrases",note:""},
+  {fr:"une tendance",en:"a trend",cat:"Words",note:""},
+  {fr:"un débat",en:"a debate",cat:"Words",note:""},
+  {fr:"furieuse / fâchée",en:"furious / angry",cat:"Words",note:""},
+  {fr:"un bénéfice",en:"a benefit",cat:"Words",note:""},
+  {fr:"je bénéficie",en:"I benefit",cat:"Verbs",note:"bénéficier de"},
+  {fr:"pour se disputer",en:"to argue",cat:"Phrases",note:""},
+  {fr:"une tragédie",en:"a tragedy",cat:"Words",note:""},
+  {fr:"perturbant",en:"disturbing",cat:"Words",note:""},
+  {fr:"sur lesquelles j'ai du pouvoir",en:"over which I have power",cat:"Phrases",note:""},
+  {fr:"le système nerveux",en:"the nervous system",cat:"Health",note:""},
+  {fr:"un avocat",en:"an avocado",cat:"Food",note:"also means lawyer"},
+  {fr:"amer",en:"bitter",cat:"Food",note:""},
+  {fr:"abrupte",en:"stiff / abrupt",cat:"Words",note:""},
+  {fr:"les fruits de mer",en:"seafood / shellfish",cat:"Food",note:""},
+  {fr:"les crustacés",en:"shellfish / crustaceans",cat:"Food",note:""},
+  {fr:"le poivre",en:"pepper (spice)",cat:"Food",note:""},
+  {fr:"le poivron",en:"bell pepper",cat:"Food",note:""},
+
+  // ── Cours mars ────────────────────────────────────────────────
+  {fr:"les vertèbres",en:"vertebrae",cat:"Health",note:""},
+  {fr:"toute la journée",en:"the whole day / all day",cat:"Phrases",note:""},
+  {fr:"un rayon X",en:"an X-ray",cat:"Health",note:""},
+  {fr:"la publicité",en:"advertisement / ad",cat:"Words",note:""},
+  {fr:"un nerf",en:"a nerve",cat:"Health",note:""},
+  {fr:"une incitation",en:"an incentive",cat:"Words",note:""},
+  {fr:"conscient",en:"aware / conscious",cat:"Words",note:""},
+  {fr:"la religion",en:"religion",cat:"Words",note:""},
+  {fr:"la philosophie",en:"philosophy",cat:"Words",note:""},
+  {fr:"la science",en:"science",cat:"Words",note:""},
+  {fr:"un savoir",en:"a knowledge",cat:"Words",note:"transmitted orally"},
+  {fr:"le plus ancien / le plus vieux",en:"the oldest",cat:"Phrases",note:""},
+  {fr:"un monopole du savoir",en:"a monopoly on knowledge",cat:"Phrases",note:""},
+  {fr:"l'espace public",en:"the public space",cat:"Words",note:""},
+  {fr:"une usine",en:"a factory",cat:"Words",note:""},
+  {fr:"le code civil",en:"the civil code",cat:"Words",note:""},
+  {fr:"les lois",en:"the laws",cat:"Words",note:""},
+  {fr:"les matériaux",en:"materials",cat:"Words",note:""},
+  {fr:"le coût",en:"the cost",cat:"Words",note:""},
+  {fr:"recréer la roue",en:"to reinvent the wheel",cat:"Phrases",note:""},
+  {fr:"repartir à zéro",en:"to start from scratch",cat:"Phrases",note:""},
+  {fr:"ajouter des couches à l'oignon",en:"to add layers to the onion",cat:"Phrases",note:"build incrementally"},
+  {fr:"le mode de pensée par défaut",en:"the default way of thinking",cat:"Phrases",note:""},
+  {fr:"ils remettent les choses en question",en:"they question things",cat:"Phrases",note:"remettre en question"},
+  {fr:"profondément",en:"deeply",cat:"Words",note:""},
+  {fr:"horizontalement",en:"horizontally",cat:"Words",note:""},
+  {fr:"la bonne approche",en:"the right approach",cat:"Phrases",note:""},
+  {fr:"le choc des idées",en:"the clash of ideas",cat:"Phrases",note:""},
+  {fr:"une mise à jour",en:"an update",cat:"Work & Tech",note:""},
+  {fr:"surpasser",en:"to surpass / outperform",cat:"Verbs",note:""},
+  {fr:"l'information tacite",en:"tacit knowledge / implicit information",cat:"Words",note:""},
+  {fr:"nos clients",en:"our customers",cat:"Work & Tech",note:""},
+  {fr:"en ventes",en:"in sales",cat:"Work & Tech",note:""},
+  {fr:"le service client",en:"customer service",cat:"Work & Tech",note:""},
+  {fr:"consigner l'information",en:"to record / log information",cat:"Work & Tech",note:""},
+  {fr:"on enregistre",en:"we record",cat:"Work & Tech",note:""},
+  {fr:"un résumé",en:"a summary",cat:"Words",note:""},
+  {fr:"une synthèse",en:"a synthesis / summary",cat:"Words",note:""},
+  {fr:"une base de données",en:"a database",cat:"Work & Tech",note:""},
+  {fr:"beaucoup de données",en:"a lot of data",cat:"Work & Tech",note:""},
+
+  // ── Cours 27 mars ─────────────────────────────────────────────
+  {fr:"des incitations",en:"incentives",cat:"Words",note:""},
+  {fr:"un curseur",en:"a cursor / slider",cat:"Words",note:""},
+  {fr:"interagit",en:"interacts",cat:"Verbs",note:"interagir"},
+  {fr:"une thermopompe",en:"a heat pump",cat:"Objects",note:""},
+  {fr:"des dossiers",en:"folders / files",cat:"Work & Tech",note:""},
+  {fr:"des rétroactions",en:"feedback",cat:"Work & Tech",note:"also: commentaires"},
+  {fr:"intégrer",en:"to embed / to integrate",cat:"Verbs",note:""},
+  {fr:"intégré",en:"embedded / integrated",cat:"Words",note:""},
+  {fr:"la transcription",en:"the transcript",cat:"Work & Tech",note:""},
+  {fr:"transcrire",en:"to transcribe",cat:"Verbs",note:"ça transcrit automatiquement"},
+  {fr:"la conversion",en:"the conversion",cat:"Words",note:"≠ conversation"},
+  {fr:"les gens avec qui je travaille",en:"the people I work with",cat:"Phrases",note:""},
+  {fr:"je serai là déjà",en:"I'll already be there",cat:"Phrases",note:"futur simple"},
+  {fr:"au mois d'avril",en:"in the month of April",cat:"Phrases",note:""},
+  {fr:"fin de mars",en:"end of March",cat:"Phrases",note:""},
+  {fr:"le premier avril",en:"April 1st",cat:"Phrases",note:"1er = premier"},
+  {fr:"debout",en:"standing up",cat:"Words",note:""},
+  {fr:"le chiropraticien",en:"the chiropractor",cat:"Health",note:"chiro (informal)"},
+  {fr:"les ajustements ne durent pas",en:"the adjustments don't last",cat:"Phrases",note:""},
+  {fr:"pas alignées",en:"not aligned / out of alignment",cat:"Phrases",note:""},
+  {fr:"le nerf vague",en:"the vagus nerve",cat:"Health",note:""},
+  {fr:"qui sont endommagés",en:"that are damaged",cat:"Phrases",note:""},
+  {fr:"ton propre sang",en:"your own blood",cat:"Phrases",note:""},
+  {fr:"réviser",en:"to review",cat:"Verbs",note:""},
+  {fr:"ajouter",en:"to add",cat:"Verbs",note:""},
+  {fr:"l'IA",en:"AI (artificial intelligence)",cat:"Work & Tech",note:"intelligence artificielle"},
+  {fr:"un changement",en:"a change",cat:"Words",note:""},
+  {fr:"une expérimentation",en:"an experiment / experimentation",cat:"Words",note:""},
+  {fr:"faire le ménage",en:"to clean / do housework",cat:"Phrases",note:""},
+  {fr:"s'enlever la vie",en:"to commit suicide",cat:"Phrases",note:"Québécois expression"},
+  {fr:"elle avait 10 ans",en:"she was 10 years old",cat:"Phrases",note:"âge uses avoir in French"},
+  {fr:"des disputes",en:"arguments / conflicts",cat:"Words",note:""},
+  {fr:"des loisirs",en:"hobbies / leisure activities",cat:"Words",note:"also: passe-temps"},
+  {fr:"des passe-temps",en:"hobbies / pastimes",cat:"Words",note:""},
+  {fr:"une imprimante",en:"a printer",cat:"Objects",note:""},
+  {fr:"physique",en:"physical (as in physical product)",cat:"Words",note:""},
+  {fr:"ça me manque",en:"I miss it",cat:"Phrases",note:"subject is the thing missed"},
+  {fr:"s'inquiéter",en:"to worry",cat:"Verbs",note:""},
+  {fr:"inquiet / inquiète",en:"worried",cat:"Words",note:"m/f forms"},
+  {fr:"les médicaments",en:"medicine / medication",cat:"Health",note:"≠ médecine (the field)"},
+  {fr:"lever la voix",en:"to raise one's voice",cat:"Phrases",note:""},
+  {fr:"fiable",en:"reliable",cat:"Words",note:""},
+  {fr:"consciencieux",en:"conscientious",cat:"Words",note:""},
+  {fr:"un sofa",en:"a couch",cat:"Objects",note:"Québécois: sofa"},
+  {fr:"écouter la télé",en:"to watch TV",cat:"Phrases",note:"écouter in Québécois French"},
+  {fr:"des habitudes",en:"habits",cat:"Words",note:""},
+  {fr:"se coucher tard",en:"to go to bed late",cat:"Phrases",note:""},
+  {fr:"requis",en:"required",cat:"Words",note:""},
+
+  // ── ADD NEW FRIDAY WORDS BELOW THIS LINE ──────────────────────
+];
+// ─────────────────────────────────────────────────────────────────
+
+const SESSION_SIZE  = 25;
+const RECENT_RATIO  = 0.60; // 60% of questions from recent words
+const RECENT_CUTOFF = 0.40; // bottom 40% of array = "recent"
+
+function getWeightedSelection(n) {
+  const total      = VOCAB.length;
+  const splitAt    = Math.floor(total * (1 - RECENT_CUTOFF));
+  const recentPool = VOCAB.slice(splitAt);
+  const olderPool  = VOCAB.slice(0, splitAt);
+
+  const nRecent = Math.round(n * RECENT_RATIO);
+  const nOlder  = n - nRecent;
+
+  function pick(pool, count) {
+    if (pool.length === 0) return [];
+    const s = shuffle([...pool]);
+    const out = [];
+    while (out.length < count) out.push(...s.slice(0, Math.min(s.length, count - out.length)));
+    return out.slice(0, count);
+  }
+
+  return shuffle([...pick(recentPool, nRecent), ...pick(olderPool, nOlder)]);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Persistence ────────────────────────────────────────────────
+let sessions = parseInt(localStorage.getItem('fr_sessions') || '0');
+let streak   = parseInt(localStorage.getItem('fr_streak')   || '0');
+let lastDate = localStorage.getItem('fr_lastdate') || '';
+
+function recordSession() {
+  sessions++;
+  localStorage.setItem('fr_sessions', sessions);
+  const today = new Date().toDateString();
+  if (lastDate !== today) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (lastDate !== yesterday.toDateString()) streak = 0;
+    streak++;
+    lastDate = today;
+    localStorage.setItem('fr_streak',  streak);
+    localStorage.setItem('fr_lastdate', today);
+  }
+}
+
+function updateHomeStats() {
+  document.getElementById('stat-total').textContent    = VOCAB.length;
+  document.getElementById('stat-sessions').textContent = sessions;
+  // Recalc streak freshness
+  const today = new Date().toDateString();
+  if (lastDate && lastDate !== today) {
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+    if (lastDate !== yesterday.toDateString()) streak = 0;
+  }
+  document.getElementById('stat-streak').textContent = streak > 0 ? streak + ' 🔥' : '0';
+  document.getElementById('home-sub').textContent =
+    lastDate === new Date().toDateString()
+      ? "You've already practiced today — nice work."
+      : '';
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() { show('screen-home'); updateHomeStats(); }
+
+// ── Session state ──────────────────────────────────────────────
+let queue = [], qIdx = 0, score = 0, missed = [], isRetry = false;
+// Store direction per question so next button always knows
+let currentDirection = true; // true = EN→FR
+
+function startSession() {
+  queue = getWeightedSelection(SESSION_SIZE);
+  qIdx = 0; score = 0; missed = []; isRetry = false;
+  show('screen-quiz');
+  renderQuestion();
+}
+
+function retryMissed() {
+  queue = shuffle([...missed]);
+  qIdx = 0; score = 0; missed = []; isRetry = true;
+  show('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (qIdx >= queue.length) { endSession(); return; }
+
+  const item  = queue[qIdx];
+  const enToFr = Math.random() < 0.5;
+  currentDirection = enToFr;
+
+  document.getElementById('q-type').textContent      = enToFr ? 'EN → FR' : 'FR → EN';
+  document.getElementById('mc-q').textContent        = enToFr ? item.en : item.fr;
+  document.getElementById('mc-hint').textContent     = item.cat + (item.note ? ' · ' + item.note : '');
+  document.getElementById('quiz-count').textContent  = (qIdx + 1) + ' / ' + queue.length;
+  document.getElementById('quiz-bar').style.width    = (qIdx / queue.length * 100) + '%';
+  document.getElementById('mc-feedback').textContent = '';
+  document.getElementById('mc-feedback').style.color = 'var(--text2)';
+  document.getElementById('next-btn').disabled       = true;
+  document.getElementById('next-btn').textContent    = qIdx === queue.length - 1 ? 'See results →' : 'Next →';
+
+  // 4 options: correct + 3 random wrong
+  const wrongs = shuffle(VOCAB.filter(v => v !== item)).slice(0, 3);
+  const opts   = shuffle([item, ...wrongs]);
+
+  const container = document.getElementById('mc-options');
+  container.innerHTML = '';
+  opts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className   = 'mc-opt';
+    btn.textContent = enToFr ? o.fr : o.en;
+    btn.onclick = () => handleAnswer(btn, o === item, item, enToFr);
+    container.appendChild(btn);
+  });
+}
+
+function handleAnswer(btn, correct, item, enToFr) {
+  // Prevent double-tap
+  if (document.getElementById('next-btn').disabled === false) return;
+  // Reveal all options
+  document.querySelectorAll('.mc-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === (enToFr ? item.fr : item.en)) b.classList.add('reveal-correct');
+  });
+  const fb = document.getElementById('mc-feedback');
+  if (correct) {
+    btn.classList.add('correct');
+    fb.textContent = '✓ Correct!';
+    fb.style.color = 'var(--green-text)';
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    fb.textContent = '✗  ' + (enToFr ? item.fr : item.en);
+    fb.style.color = 'var(--red-text)';
+    missed.push(item);
+  }
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextQuestion() { qIdx++; renderQuestion(); }
+
+function endSession() {
+  if (!isRetry) recordSession();
+  show('screen-results');
+
+  const pct = Math.round(score / queue.length * 100);
+  document.getElementById('res-pct').textContent      = pct + '%';
+  document.getElementById('res-fraction').textContent = score + ' of ' + queue.length + ' correct';
+  document.getElementById('res-msg').textContent      = getLabel(pct);
+  document.getElementById('retry-btn').style.display  = missed.length > 0 ? 'inline-block' : 'none';
+
+  const ml = document.getElementById('missed-list');
+  ml.innerHTML = '';
+  if (missed.length > 0) {
+    ml.innerHTML = '<div class="missed-title">Missed</div>';
+    missed.forEach(m => {
+      ml.innerHTML += `<div class="missed-item"><span class="missed-fr">${m.fr}</span><span class="missed-en">${m.en}</span></div>`;
+    });
+  }
+}
+
+function getLabel(pct) {
+  if (pct === 100) return 'Perfect! 🎉';
+  if (pct >= 90)   return 'Excellent work';
+  if (pct >= 75)   return 'Good session';
+  if (pct >= 55)   return 'Keep at it';
+  return 'More practice needed';
+}
+
+// ── Init ───────────────────────────────────────────────────────
+updateHomeStats();
+</script>
+</body>
+</html>
