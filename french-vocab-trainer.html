@@ -140,10 +140,10 @@
     padding: 10px 12px; border-radius: var(--radius);
     background: var(--bg2); font-size: 13px;
     margin-bottom: 6px; display: flex;
-    justify-content: space-between; align-items: baseline; gap: 12px;
+    justify-content: space-between; align-items: center; gap: 12px;
   }
-  .missed-fr { font-weight: 500; }
-  .missed-en { color: var(--text2); flex-shrink: 0; }
+  .missed-fr { font-weight: 500; margin-bottom: 2px; }
+  .missed-en { color: var(--text2); }
 </style>
 </head>
 <body>
@@ -522,27 +522,44 @@ const VOCAB = [
 ];
 // ─────────────────────────────────────────────────────────────────
 
-const SESSION_SIZE   = 25;
-const RECENT_RATIO   = 0.40; // 40% from recent words
-const RECENT_CUTOFF  = 0.35; // bottom 35% of array = "recent"
+const SESSION_SIZE = 25;
+
+// ── Score system ───────────────────────────────────────────────
+// Scores 0–4 stored in localStorage. Miss → score-1, Got it → score+1.
+// Score → draw weight: 0=8  1=4  2=2  3=1  4=0.25
+// New words default to score 1.
+const SCORE_KEY = 'fr_scores_v1';
+const WEIGHTS   = [8, 4, 2, 1, 0.25];
+
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem(SCORE_KEY) || '{}'); }
+  catch { return {}; }
+}
+function saveScores(s) { localStorage.setItem(SCORE_KEY, JSON.stringify(s)); }
+function getScore(scores, fr) { return scores[fr] !== undefined ? scores[fr] : 1; }
+function scoreLabel(s) { return ['🔴🔴🔴','🔴🔴','🔴','🟡','🟢'][Math.min(s,4)]; }
 
 function getWeightedSelection(n) {
-  const splitAt    = Math.floor(VOCAB.length * (1 - RECENT_CUTOFF));
-  const recentPool = VOCAB.slice(splitAt);
-  const olderPool  = VOCAB.slice(0, splitAt);
-
-  const nRecent = Math.round(n * RECENT_RATIO);
-  const nOlder  = n - nRecent;
-
-  function pick(pool, count) {
-    if (!pool.length) return [];
-    const s = shuffle([...pool]);
-    const out = [];
-    while (out.length < count) out.push(...s.slice(0, Math.min(s.length, count - out.length)));
-    return out.slice(0, count);
+  const scores = loadScores();
+  // Build weighted pool — repeat each word proportionally to its weight
+  const pool = [];
+  VOCAB.forEach(item => {
+    const w = Math.round(WEIGHTS[Math.min(getScore(scores, item.fr), 4)] * 4);
+    for (let i = 0; i < w; i++) pool.push(item);
+  });
+  // Sample unique words
+  const shuffled = shuffle(pool);
+  const seen = new Set(), result = [];
+  for (const item of shuffled) {
+    if (!seen.has(item.fr)) { seen.add(item.fr); result.push(item); }
+    if (result.length === n) break;
   }
-
-  return shuffle([...pick(recentPool, nRecent), ...pick(olderPool, nOlder)]);
+  // Pad if vocab is small
+  if (result.length < n) {
+    shuffle(VOCAB).filter(v => !seen.has(v.fr))
+      .slice(0, n - result.length).forEach(v => result.push(v));
+  }
+  return result;
 }
 
 function shuffle(arr) {
@@ -645,7 +662,12 @@ function flipCard() {
 }
 
 function grade(correct) {
-  if (!correct) missed.push(queue[qIdx]);
+  const item   = queue[qIdx];
+  const scores = loadScores();
+  const prev   = getScore(scores, item.fr);
+  scores[item.fr] = correct ? Math.min(prev + 1, 4) : Math.max(prev - 1, 0);
+  saveScores(scores);
+  if (!correct) missed.push({ ...item, score: scores[item.fr] });
   qIdx++;
   renderCard();
 }
@@ -665,9 +687,17 @@ function endSession() {
   const sec = document.getElementById('missed-section');
   sec.innerHTML = '';
   if (missed.length > 0) {
-    sec.innerHTML = '<div class="missed-label">Missed</div>';
-    missed.forEach(m => {
-      sec.innerHTML += `<div class="missed-item"><span class="missed-fr">${m.fr}</span><span class="missed-en">${m.en}</span></div>`;
+    sec.innerHTML = '<div class="missed-label">Missed this session</div>';
+    const sorted = [...missed].sort((a, b) => a.score - b.score);
+    sorted.forEach(m => {
+      sec.innerHTML += `
+        <div class="missed-item">
+          <div>
+            <div class="missed-fr">${m.fr}</div>
+            <div class="missed-en">${m.en}</div>
+          </div>
+          <div style="font-size:13px;flex-shrink:0">${scoreLabel(m.score)}</div>
+        </div>`;
     });
   }
 }
