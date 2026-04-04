@@ -2,85 +2,148 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Français daily</title>
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Français daily">
+
+<!-- PWA: standalone mode, theme, icons -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Français" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#1c1c1a" media="(prefers-color-scheme: dark)" />
+
+<!-- Inline SVG icon as data URI — works for both Apple touch icon and manifest -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+
+<!-- Inline web app manifest -->
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Fran%C3%A7ais+daily%22%2C%22short_name%22%3A%22Fran%C3%A7ais%22%2C%22display%22%3A%22standalone%22%2C%22start_url%22%3A%22.%22%2C%22background_color%22%3A%22%231c1c1a%22%2C%22theme_color%22%3A%22%231c1c1a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg+xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27+viewBox%3D%270+0+512+512%27%253E%253Crect+width%3D%27512%27+height%3D%27512%27+rx%3D%27114%27+fill%3D%27%25231a1a18%27%2F%253E%253Ctext+x%3D%27256%27+y%3D%27360%27+font-family%3D%27system-ui%27+font-size%3D%27300%27+font-weight%3D%27500%27+fill%3D%27white%27+text-anchor%3D%27middle%27%253EF%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%5D%7D" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg: #ffffff; --bg2: #f5f4f1; --text: #1a1a18; --text2: #6b6b67; --text3: #a0a09c;
+    --bg: #ffffff; --bg2: #f5f4f1; --bg3: #ededea;
+    --text: #1a1a18; --text2: #6b6b67; --text3: #a0a09c;
     --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
-    --blue: #185FA5; --blue-bg: #E6F1FB; --blue-text: #185FA5;
     --green-bg: #EAF3DE; --green-text: #27500A; --green-border: #97C459;
-    --red-bg: #FAECE7; --red-text: #4A1B0C; --red-border: #F0997B;
+    --red-bg: #FAECE7; --red-text: #993C1D; --red-border: #F0997B;
     --radius: 8px; --radius-lg: 12px;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #1c1c1a; --bg2: #252523; --text: #f0efe8; --text2: #a0a09a; --text3: #6b6b65;
+      --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+      --text: #f0efe8; --text2: #a0a09a; --text3: #6b6b65;
       --border: rgba(255,255,255,0.1); --border2: rgba(255,255,255,0.2);
-      --blue: #85B7EB; --blue-bg: #0c1f33; --blue-text: #85B7EB;
       --green-bg: #172804; --green-text: #C0DD97; --green-border: #3B6D11;
       --red-bg: #2a0e06; --red-text: #F0997B; --red-border: #993C1D;
     }
   }
 
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  #app { max-width: 520px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+  }
+  #app { max-width: 480px; margin: 0 auto; padding: 2rem 1.25rem 4rem; padding-top: max(2rem, env(safe-area-inset-top)); padding-bottom: max(4rem, env(safe-area-inset-bottom)); }
   .screen { display: none; }
   .screen.active { display: block; }
 
-  /* HOME */
-  .home-top { margin-bottom: 2.5rem; }
-  .home-top h1 { font-size: 22px; font-weight: 500; }
-  .home-top p { font-size: 14px; color: var(--text2); margin-top: 4px; }
+  /* ── HOME ─────────────────────────────────────────────────── */
+  .home-title { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+  .home-sub   { font-size: 14px; color: var(--text2); margin-bottom: 2.5rem; }
+
   .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 2.5rem; }
-  .stat-card { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; }
+  .stat-card  { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; }
   .stat-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
-  .stat-val { font-size: 22px; font-weight: 500; }
-  .start-area { text-align: center; }
-  .start-btn { display: inline-block; padding: 14px 40px; border-radius: var(--radius-lg); border: 0.5px solid var(--border2); background: none; cursor: pointer; font-size: 16px; font-weight: 500; color: var(--text); font-family: inherit; transition: background 0.12s; }
+  .stat-val   { font-size: 22px; font-weight: 500; }
+
+  .start-wrap { text-align: center; }
+  .start-btn  {
+    padding: 14px 44px; border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border2); background: none;
+    cursor: pointer; font-size: 16px; font-weight: 500;
+    color: var(--text); font-family: inherit; transition: background 0.12s;
+  }
   .start-btn:hover { background: var(--bg2); }
-  .start-sub { margin-top: 10px; font-size: 13px; color: var(--text3); min-height: 20px; }
+  .start-note { margin-top: 10px; font-size: 13px; color: var(--text3); min-height: 20px; }
 
-  /* QUIZ */
-  .quiz-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; }
-  .back-btn { font-size: 14px; background: none; border: none; cursor: pointer; color: var(--text2); padding: 0; font-family: inherit; }
-  .quiz-count { font-size: 13px; color: var(--text2); flex: 1; text-align: right; }
-  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 1.75rem; overflow: hidden; }
-  .progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.35s cubic-bezier(.4,0,.2,1); }
-  .question-type { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-  .mc-question { background: var(--bg2); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.25rem; min-height: 110px; display: flex; align-items: center; justify-content: center; }
-  .mc-q-text { font-size: 24px; font-weight: 500; text-align: center; line-height: 1.35; }
-  .mc-q-hint { font-size: 13px; color: var(--text2); text-align: center; margin-top: 8px; }
-  .mc-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.25rem; }
-  .mc-opt { padding: 14px 16px; border: 0.5px solid var(--border2); border-radius: var(--radius); background: var(--bg); cursor: pointer; font-size: 14px; color: var(--text); text-align: left; line-height: 1.4; transition: all 0.12s; font-family: inherit; }
-  .mc-opt:hover:not([disabled]) { background: var(--bg2); }
-  .mc-opt.correct { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
-  .mc-opt.wrong { background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); }
-  .mc-opt.reveal-correct { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
-  .mc-feedback { font-size: 14px; text-align: center; min-height: 22px; margin-bottom: 1rem; }
-  .next-btn { width: 100%; padding: 12px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: var(--bg); cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text); transition: all 0.12s; font-family: inherit; }
-  .next-btn:hover { background: var(--bg2); }
-  .next-btn:disabled { opacity: 0.35; cursor: default; }
+  /* ── FLASHCARD SCREEN ─────────────────────────────────────── */
+  .fc-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 1rem;
+  }
+  .back-btn {
+    font-size: 14px; background: none; border: none;
+    cursor: pointer; color: var(--text2); padding: 0; font-family: inherit;
+  }
+  .fc-count { font-size: 13px; color: var(--text2); flex: 1; text-align: right; }
 
-  /* RESULTS */
-  .results-wrap { text-align: center; padding: 0.5rem 0; }
-  .results-score { font-size: 60px; font-weight: 500; line-height: 1; margin-bottom: 6px; }
-  .results-fraction { font-size: 15px; color: var(--text2); margin-bottom: 8px; }
-  .results-msg { font-size: 16px; margin-bottom: 2rem; }
-  .results-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-  .results-btn { padding: 10px 22px; border-radius: var(--radius); border: 0.5px solid var(--border2); background: none; cursor: pointer; font-size: 14px; color: var(--text); font-family: inherit; transition: background 0.12s; }
+  .progress-bar  { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--text3); border-radius: 2px; transition: width 0.3s cubic-bezier(.4,0,.2,1); }
+
+  /* Card flip */
+  .card-scene { perspective: 900px; height: 240px; margin-bottom: 1.5rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .card       { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.42s cubic-bezier(.4,0,.2,1); }
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background: var(--bg2); border-radius: var(--radius-lg);
+    border: 0.5px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem 1.75rem; text-align: center;
+  }
+  .card-back { transform: rotateY(180deg); }
+
+  .card-eyebrow { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
+  .card-word    { font-size: 26px; font-weight: 500; line-height: 1.3; color: var(--text); }
+  .card-note    { font-size: 13px; color: var(--text2); margin-top: 10px; }
+  .card-cat     {
+    font-size: 11px; color: var(--text2);
+    background: var(--bg3); border-radius: 999px;
+    padding: 3px 10px; margin-bottom: 14px;
+  }
+
+  .tap-hint { text-align: center; font-size: 13px; color: var(--text3); margin-bottom: 1.25rem; }
+
+  /* Grade buttons — hidden until card is flipped */
+  .grade-row { display: flex; gap: 10px; }
+  .grade-btn {
+    flex: 1; padding: 14px; border-radius: var(--radius);
+    border: 0.5px solid var(--border2); background: none;
+    cursor: pointer; font-size: 15px; font-weight: 500;
+    font-family: inherit; transition: all 0.12s;
+  }
+  .grade-btn.missed { color: var(--red-text); border-color: var(--red-border); }
+  .grade-btn.missed:hover { background: var(--red-bg); }
+  .grade-btn.got-it { color: var(--green-text); border-color: var(--green-border); }
+  .grade-btn.got-it:hover { background: var(--green-bg); }
+
+  /* ── RESULTS ──────────────────────────────────────────────── */
+  .results-wrap { padding: 0.5rem 0; }
+  .results-done { font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+  .results-meta { font-size: 14px; color: var(--text2); margin-bottom: 2rem; }
+
+  .results-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .results-btn {
+    padding: 11px 22px; border-radius: var(--radius);
+    border: 0.5px solid var(--border2); background: none;
+    cursor: pointer; font-size: 14px; color: var(--text);
+    font-family: inherit; transition: background 0.12s;
+  }
   .results-btn:hover { background: var(--bg2); }
-  .missed-list { text-align: left; margin-top: 2rem; }
-  .missed-title { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
-  .missed-item { padding: 9px 12px; border-radius: var(--radius); background: var(--bg2); font-size: 13px; margin-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; }
+
+  .missed-section { margin-top: 2rem; }
+  .missed-label   { font-size: 12px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+  .missed-item    {
+    padding: 10px 12px; border-radius: var(--radius);
+    background: var(--bg2); font-size: 13px;
+    margin-bottom: 6px; display: flex;
+    justify-content: space-between; align-items: baseline; gap: 12px;
+  }
   .missed-fr { font-weight: 500; }
-  .missed-en { color: var(--text2); }
+  .missed-en { color: var(--text2); flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -88,51 +151,63 @@
 
   <!-- HOME -->
   <div id="screen-home" class="screen active">
-    <div class="home-top">
-      <h1>Français daily</h1>
-      <p>25 questions · mixed EN↔FR · weighted to recent words</p>
-    </div>
+    <div class="home-title">Français daily</div>
+    <div class="home-sub">See English · say French · flip to check</div>
     <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">Total words</div><div class="stat-val" id="stat-total">0</div></div>
+      <div class="stat-card"><div class="stat-label">Words</div><div class="stat-val" id="stat-total">0</div></div>
       <div class="stat-card"><div class="stat-label">Sessions</div><div class="stat-val" id="stat-sessions">0</div></div>
       <div class="stat-card"><div class="stat-label">Streak</div><div class="stat-val" id="stat-streak">0</div></div>
     </div>
-    <div class="start-area">
+    <div class="start-wrap">
       <button class="start-btn" onclick="startSession()">Start today's lesson →</button>
-      <div class="start-sub" id="home-sub"></div>
+      <div class="start-note" id="start-note"></div>
     </div>
   </div>
 
-  <!-- QUIZ -->
-  <div id="screen-quiz" class="screen">
-    <div class="quiz-header">
+  <!-- FLASHCARD -->
+  <div id="screen-fc" class="screen">
+    <div class="fc-header">
       <button class="back-btn" onclick="goHome()">← Home</button>
-      <div class="quiz-count" id="quiz-count">1 / 25</div>
+      <div class="fc-count" id="fc-count">1 / 25</div>
     </div>
-    <div class="progress-bar"><div class="progress-fill" id="quiz-bar" style="width:0%"></div></div>
-    <div class="question-type" id="q-type"></div>
-    <div class="mc-question">
-      <div style="width:100%">
-        <div class="mc-q-text" id="mc-q"></div>
-        <div class="mc-q-hint" id="mc-hint"></div>
+    <div class="progress-bar"><div class="progress-fill" id="fc-bar" style="width:0%"></div></div>
+
+    <div class="card-scene" onclick="flipCard()" id="card-scene">
+      <div class="card" id="card">
+        <!-- Front: English prompt -->
+        <div class="card-face card-front">
+          <div class="card-eyebrow">say it in French</div>
+          <div class="card-word" id="card-en"></div>
+          <div class="card-note" id="card-cat-front"></div>
+        </div>
+        <!-- Back: French answer -->
+        <div class="card-face card-back">
+          <div class="card-eyebrow">French</div>
+          <div class="card-cat" id="card-cat"></div>
+          <div class="card-word" id="card-fr"></div>
+          <div class="card-note" id="card-note"></div>
+        </div>
       </div>
     </div>
-    <div class="mc-options" id="mc-options"></div>
-    <div class="mc-feedback" id="mc-feedback"></div>
-    <button class="next-btn" id="next-btn" onclick="nextQuestion()" disabled>Next →</button>
+
+    <div class="tap-hint" id="tap-hint">Tap card to reveal</div>
+
+    <div class="grade-row" id="grade-row" style="display:none">
+      <button class="grade-btn missed" onclick="grade(false)">✗ Missed</button>
+      <button class="grade-btn got-it" onclick="grade(true)">✓ Got it</button>
+    </div>
   </div>
 
   <!-- RESULTS -->
   <div id="screen-results" class="screen">
     <div class="results-wrap">
-      <div class="results-score" id="res-pct"></div>
-      <div class="results-fraction" id="res-fraction"></div>
-      <div class="results-msg" id="res-msg"></div>
+      <div class="results-done" id="res-done">Session done</div>
+      <div class="results-meta" id="res-meta"></div>
       <div class="results-actions">
         <button class="results-btn" onclick="goHome()">← Home</button>
         <button class="results-btn" id="retry-btn" onclick="retryMissed()" style="display:none">Retry missed →</button>
       </div>
-      <div class="missed-list" id="missed-list"></div>
+      <div class="missed-section" id="missed-section"></div>
     </div>
   </div>
 
@@ -140,9 +215,8 @@
 <script>
 // ─────────────────────────────────────────────────────────────────
 //  VOCABULARY
-//  Add new Friday words at the BOTTOM of this array.
-//  The weighting system treats words later in the list as more
-//  recent and will surface them more often in daily sessions.
+//  Add new Friday words at the BOTTOM — the weighting system
+//  treats words later in the list as more recent.
 //
 //  Format: { fr: "French", en: "English", cat: "Category", note: "optional" }
 // ─────────────────────────────────────────────────────────────────
@@ -448,13 +522,12 @@ const VOCAB = [
 ];
 // ─────────────────────────────────────────────────────────────────
 
-const SESSION_SIZE  = 25;
-const RECENT_RATIO  = 0.60; // 60% of questions from recent words
-const RECENT_CUTOFF = 0.40; // bottom 40% of array = "recent"
+const SESSION_SIZE   = 25;
+const RECENT_RATIO   = 0.40; // 40% from recent words
+const RECENT_CUTOFF  = 0.35; // bottom 35% of array = "recent"
 
 function getWeightedSelection(n) {
-  const total      = VOCAB.length;
-  const splitAt    = Math.floor(total * (1 - RECENT_CUTOFF));
+  const splitAt    = Math.floor(VOCAB.length * (1 - RECENT_CUTOFF));
   const recentPool = VOCAB.slice(splitAt);
   const olderPool  = VOCAB.slice(0, splitAt);
 
@@ -462,7 +535,7 @@ function getWeightedSelection(n) {
   const nOlder  = n - nRecent;
 
   function pick(pool, count) {
-    if (pool.length === 0) return [];
+    if (!pool.length) return [];
     const s = shuffle([...pool]);
     const out = [];
     while (out.length < count) out.push(...s.slice(0, Math.min(s.length, count - out.length)));
@@ -491,8 +564,7 @@ function recordSession() {
   localStorage.setItem('fr_sessions', sessions);
   const today = new Date().toDateString();
   if (lastDate !== today) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     if (lastDate !== yesterday.toDateString()) streak = 0;
     streak++;
     lastDate = today;
@@ -501,135 +573,130 @@ function recordSession() {
   }
 }
 
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  show('screen-home');
+  updateHomeStats();
+}
+
 function updateHomeStats() {
   document.getElementById('stat-total').textContent    = VOCAB.length;
   document.getElementById('stat-sessions').textContent = sessions;
-  // Recalc streak freshness
   const today = new Date().toDateString();
   if (lastDate && lastDate !== today) {
     const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
     if (lastDate !== yesterday.toDateString()) streak = 0;
   }
   document.getElementById('stat-streak').textContent = streak > 0 ? streak + ' 🔥' : '0';
-  document.getElementById('home-sub').textContent =
-    lastDate === new Date().toDateString()
-      ? "You've already practiced today — nice work."
-      : '';
+  document.getElementById('start-note').textContent  =
+    lastDate === new Date().toDateString() ? "You've already practiced today — nice work." : '';
 }
 
-function show(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function goHome() { show('screen-home'); updateHomeStats(); }
-
-// ── Session state ──────────────────────────────────────────────
-let queue = [], qIdx = 0, score = 0, missed = [], isRetry = false;
-// Store direction per question so next button always knows
-let currentDirection = true; // true = EN→FR
+// ── Session ────────────────────────────────────────────────────
+let queue = [], qIdx = 0, missed = [], isRetry = false, flipped = false;
 
 function startSession() {
   queue = getWeightedSelection(SESSION_SIZE);
-  qIdx = 0; score = 0; missed = []; isRetry = false;
-  show('screen-quiz');
-  renderQuestion();
+  qIdx = 0; missed = []; isRetry = false;
+  show('screen-fc');
+  renderCard();
 }
 
 function retryMissed() {
   queue = shuffle([...missed]);
-  qIdx = 0; score = 0; missed = []; isRetry = true;
-  show('screen-quiz');
-  renderQuestion();
+  qIdx = 0; missed = []; isRetry = true;
+  show('screen-fc');
+  renderCard();
 }
 
-function renderQuestion() {
+function renderCard() {
   if (qIdx >= queue.length) { endSession(); return; }
+  flipped = false;
 
-  const item  = queue[qIdx];
-  const enToFr = Math.random() < 0.5;
-  currentDirection = enToFr;
+  const item = queue[qIdx];
+  document.getElementById('card-en').textContent       = item.en;
+  document.getElementById('card-cat-front').textContent = item.cat;
+  document.getElementById('card-fr').textContent       = item.fr;
+  document.getElementById('card-cat').textContent      = item.cat;
+  document.getElementById('card-note').textContent     = item.note || '';
+  document.getElementById('fc-count').textContent      = (qIdx + 1) + ' / ' + queue.length;
+  document.getElementById('fc-bar').style.width        = (qIdx / queue.length * 100) + '%';
 
-  document.getElementById('q-type').textContent      = enToFr ? 'EN → FR' : 'FR → EN';
-  document.getElementById('mc-q').textContent        = enToFr ? item.en : item.fr;
-  document.getElementById('mc-hint').textContent     = item.cat + (item.note ? ' · ' + item.note : '');
-  document.getElementById('quiz-count').textContent  = (qIdx + 1) + ' / ' + queue.length;
-  document.getElementById('quiz-bar').style.width    = (qIdx / queue.length * 100) + '%';
-  document.getElementById('mc-feedback').textContent = '';
-  document.getElementById('mc-feedback').style.color = 'var(--text2)';
-  document.getElementById('next-btn').disabled       = true;
-  document.getElementById('next-btn').textContent    = qIdx === queue.length - 1 ? 'See results →' : 'Next →';
-
-  // 4 options: correct + 3 random wrong
-  const wrongs = shuffle(VOCAB.filter(v => v !== item)).slice(0, 3);
-  const opts   = shuffle([item, ...wrongs]);
-
-  const container = document.getElementById('mc-options');
-  container.innerHTML = '';
-  opts.forEach(o => {
-    const btn = document.createElement('button');
-    btn.className   = 'mc-opt';
-    btn.textContent = enToFr ? o.fr : o.en;
-    btn.onclick = () => handleAnswer(btn, o === item, item, enToFr);
-    container.appendChild(btn);
-  });
+  // Reset flip state
+  const card = document.getElementById('card');
+  card.classList.remove('flipped');
+  document.getElementById('tap-hint').style.display  = 'block';
+  document.getElementById('grade-row').style.display = 'none';
+  document.getElementById('card-scene').style.pointerEvents = 'auto';
 }
 
-function handleAnswer(btn, correct, item, enToFr) {
-  // Prevent double-tap
-  if (document.getElementById('next-btn').disabled === false) return;
-  // Reveal all options
-  document.querySelectorAll('.mc-opt').forEach(b => {
-    b.disabled = true;
-    if (b.textContent === (enToFr ? item.fr : item.en)) b.classList.add('reveal-correct');
-  });
-  const fb = document.getElementById('mc-feedback');
-  if (correct) {
-    btn.classList.add('correct');
-    fb.textContent = '✓ Correct!';
-    fb.style.color = 'var(--green-text)';
-    score++;
-  } else {
-    btn.classList.add('wrong');
-    fb.textContent = '✗  ' + (enToFr ? item.fr : item.en);
-    fb.style.color = 'var(--red-text)';
-    missed.push(item);
-  }
-  document.getElementById('next-btn').disabled = false;
+function flipCard() {
+  if (flipped) return;
+  flipped = true;
+  document.getElementById('card').classList.add('flipped');
+  document.getElementById('tap-hint').style.display  = 'none';
+  document.getElementById('grade-row').style.display = 'flex';
+  // Disable further card taps once flipped
+  document.getElementById('card-scene').style.pointerEvents = 'none';
 }
 
-function nextQuestion() { qIdx++; renderQuestion(); }
+function grade(correct) {
+  if (!correct) missed.push(queue[qIdx]);
+  qIdx++;
+  renderCard();
+}
 
 function endSession() {
   if (!isRetry) recordSession();
   show('screen-results');
 
-  const pct = Math.round(score / queue.length * 100);
-  document.getElementById('res-pct').textContent      = pct + '%';
-  document.getElementById('res-fraction').textContent = score + ' of ' + queue.length + ' correct';
-  document.getElementById('res-msg').textContent      = getLabel(pct);
-  document.getElementById('retry-btn').style.display  = missed.length > 0 ? 'inline-block' : 'none';
+  document.getElementById('res-done').textContent = isRetry ? 'Retry done' : 'Session done';
+  document.getElementById('res-meta').textContent =
+    missed.length === 0
+      ? 'Clean session — nothing missed.'
+      : missed.length + ' word' + (missed.length > 1 ? 's' : '') + ' to review.';
 
-  const ml = document.getElementById('missed-list');
-  ml.innerHTML = '';
+  document.getElementById('retry-btn').style.display = missed.length > 0 ? 'inline-block' : 'none';
+
+  const sec = document.getElementById('missed-section');
+  sec.innerHTML = '';
   if (missed.length > 0) {
-    ml.innerHTML = '<div class="missed-title">Missed</div>';
+    sec.innerHTML = '<div class="missed-label">Missed</div>';
     missed.forEach(m => {
-      ml.innerHTML += `<div class="missed-item"><span class="missed-fr">${m.fr}</span><span class="missed-en">${m.en}</span></div>`;
+      sec.innerHTML += `<div class="missed-item"><span class="missed-fr">${m.fr}</span><span class="missed-en">${m.en}</span></div>`;
     });
   }
 }
 
-function getLabel(pct) {
-  if (pct === 100) return 'Perfect! 🎉';
-  if (pct >= 90)   return 'Excellent work';
-  if (pct >= 75)   return 'Good session';
-  if (pct >= 55)   return 'Keep at it';
-  return 'More practice needed';
-}
-
 // ── Init ───────────────────────────────────────────────────────
 updateHomeStats();
+
+// ── Service worker: cache this page for offline use ────────────
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'francais-v1';
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll([self.location.pathname])));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys =>
+        Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      ));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
 </script>
 </body>
 </html>
